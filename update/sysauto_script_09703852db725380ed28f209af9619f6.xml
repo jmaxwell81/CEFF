@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sysauto_script">
+    <sysauto_script action="INSERT_OR_UPDATE">
+        <active>false</active>
+        <condition/>
+        <conditional>false</conditional>
+        <name>PS CEFF Email Reminder </name>
+        <run_as display_value="Dinesh Kumar">a627ab10dbd91b808a08f35aaf9619a6</run_as>
+        <run_as_tz/>
+        <run_dayofmonth>1</run_dayofmonth>
+        <run_dayofweek>1</run_dayofweek>
+        <run_period/>
+        <run_start>2018-06-21 18:35:41</run_start>
+        <run_time>1970-01-01 12:00:00</run_time>
+        <run_type>weekly</run_type>
+        <script><![CDATA[var sit = new GlideRecord('x_grs_ceff_headers');
+sit.addQuery('status', '!=', 'Completed');
+sit.addQuery('status', '!=', 'Abandoned');
+sit.query();
+while(sit.next()){
+	var r = /\d+/g;
+    var s = sit.number;
+	gs.info(s);
+	//gs.eventQueue("x_grs_ceff_sample.reminder.CEFFNOTIFY",sit, gs.getUserID(), sit.evaluator_email);
+	
+	if(sit.status == 'Sent'){
+		sit.status = 'Reminder1';
+		gs.eventQueue("x_grs_ceff.reminder.CEFFNOTIFY",sit, gs.getUserID(), sit.evaluator_email);
+		var sqlUpdateHeaders = new JDBCProbe('FieldCoreDev_1');   
+    sqlUpdateHeaders.setDataSource('75d81d5edbba5b408a08f35aaf961993');  
+	sqlUpdateHeaders.setFunction("update");   
+	sqlUpdateHeaders.setTable("gsi_feedback_form_headers_test");   
+	sqlUpdateHeaders.setWhereClause("formid ='"+s.match(r)+"'"); 
+	sqlUpdateHeaders.addField("reminder", 1);
+	sqlUpdateHeaders.create();
+		gs.info("R1" + s);
+	}
+	
+	else if(sit.status == 'Reminder1'){
+		sit.status = 'Reminder2';
+		gs.eventQueue("x_grs_ceff.reminder.CEFFNOTIFY",sit, gs.getUserID(), sit.evaluator_email);
+		var sqlUpdateHeaders = new JDBCProbe('FieldCoreDev_1');   
+    sqlUpdateHeaders.setDataSource('75d81d5edbba5b408a08f35aaf961993');  
+	sqlUpdateHeaders.setFunction("update");   
+	sqlUpdateHeaders.setTable("gsi_feedback_form_headers_test");   
+	sqlUpdateHeaders.setWhereClause("formid ='"+s.match(r)+"'"); 
+	sqlUpdateHeaders.addField("reminder", 2);
+	sqlUpdateHeaders.create();
+		gs.info("R2" + s);
+	}
+	
+	else  if(sit.status == 'Reminder2'){
+		sit.status = 'Abandoned';
+	var sqlUpdateHeaders = new JDBCProbe('FieldCoreDev_1');   
+    sqlUpdateHeaders.setDataSource('75d81d5edbba5b408a08f35aaf961993');  
+	sqlUpdateHeaders.setFunction("update");   
+	sqlUpdateHeaders.setTable("gsi_feedback_form_headers_test");   
+	sqlUpdateHeaders.setWhereClause("formid ='"+s.match(r)+"'"); 
+	sqlUpdateHeaders.addField("status", "Abandoned");
+	sqlUpdateHeaders.create();
+		gs.info("R3" + s);
+	}
+	
+ sit.update();
+	
+}
+
+
+]]></script>
+        <sys_class_name>sysauto_script</sys_class_name>
+        <sys_created_by>Raghu.Kumar</sys_created_by>
+        <sys_created_on>2018-06-21 18:37:31</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>09703852db725380ed28f209af9619f6</sys_id>
+        <sys_mod_count>16</sys_mod_count>
+        <sys_name>PS CEFF Email Reminder </sys_name>
+        <sys_package display_value="Crew/Employee Feedback Form" source="x_grs_ceff">7ee8bb8edb765b408a08f35aaf9619dd</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Crew/Employee Feedback Form">7ee8bb8edb765b408a08f35aaf9619dd</sys_scope>
+        <sys_update_name>sysauto_script_09703852db725380ed28f209af9619f6</sys_update_name>
+        <sys_updated_by>abhinav</sys_updated_by>
+        <sys_updated_on>2018-07-03 11:12:38</sys_updated_on>
+        <u_advanced>true</u_advanced>
+        <u_conditions/>
+        <u_event_name/>
+        <u_event_parm_1/>
+        <u_event_parm_2/>
+        <u_run_business_rules>true</u_run_business_rules>
+        <u_save_script><![CDATA[new global.ScriptlessScheduledJobUtils(current).updateRecords();]]></u_save_script>
+        <u_set_field_values/>
+        <u_trigger_event>false</u_trigger_event>
+        <upgrade_safe>false</upgrade_safe>
+    </sysauto_script>
+</record_update>
